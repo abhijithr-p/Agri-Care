@@ -424,110 +424,44 @@ const CROP_PLANS = {
 
 
 
-app.get('/', (req, res) => res.send('AgriCare Backend API running...'));
+// Add this to your 5. API ROUTES section in server.js
+// You will need to install multer if you haven't already: npm install multer
 
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
 
-
-// Auth Routes
-
-app.post('/api/auth/send-otp', async (req, res) => {
-
+app.post('/api/disease-detection', upload.single('image'), async (req, res) => {
   try {
-
-    const { phone } = req.body;
-
-    if (!phone || phone.length < 10) {
-
-      return res.status(400).json({ success: false, message: 'Invalid phone number.' });
-
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No image uploaded.' });
     }
 
+    // Convert image buffer to base64 for Gemini
+    const imageBase64 = req.file.buffer.toString('base64');
 
+    const prompt = "Analyze this plant leaf image. Identify the disease if any, explain the symptoms, and provide organic and chemical treatment recommendations. Keep the response structured.";
 
-    const existingUser = await User.findOne({ phone });
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.0-flash', // Using flash for vision tasks
+      contents: [
+        {
+          inlineData: {
+            mimeType: req.file.mimetype,
+            data: imageBase64
+          }
+        },
+        { text: prompt }
+      ]
+    });
 
-    if (!existingUser) {
-
-      return res.status(404).json({ success: false, isRegistered: false, message: 'Phone not registered.' });
-
-    }
-
-
-
-    const generatedOtp = Math.floor(1000 + Math.random() * 9000).toString();
-
-    await Otp.deleteMany({ phone });
-
-    await Otp.create({ phone, otp: generatedOtp });
-
-
-
-    console.log(`[OTP] Phone: ${phone} | OTP: ${generatedOtp}`);
-
-    return res.json({ success: true, isRegistered: true, devOtp: generatedOtp });
+    const resultText = response.text || "Could not analyze the image.";
+    return res.json({ success: true, diagnosis: resultText });
 
   } catch (err) {
-
-    return res.status(500).json({ success: false, message: 'OTP send error.' });
-
+    console.error("Disease Detection Error:", err);
+    return res.status(500).json({ success: false, message: 'Failed to connect to AI expert.' });
   }
-
 });
-
-
-
-app.post('/api/auth/verify-otp', async (req, res) => {
-
-  try {
-
-    const { phone, otp } = req.body;
-
-    const record = await Otp.findOne({ phone, otp });
-
-    if (!record) return res.status(400).json({ success: false, message: 'Invalid OTP.' });
-
-
-
-    await Otp.deleteMany({ phone });
-
-    const user = await User.findOne({ phone });
-
-    return res.json({ success: true, user });
-
-  } catch (err) {
-
-    return res.status(500).json({ success: false, message: 'Verification error.' });
-
-  }
-
-});
-
-
-
-app.post('/api/auth/register', async (req, res) => {
-
-  try {
-
-    const { name, phone, location, crop } = req.body;
-
-    const existing = await User.findOne({ phone });
-
-    if (existing) return res.status(400).json({ success: false, message: 'User exists.' });
-
-
-
-    const newUser = await User.create({ name, phone, location, crop });
-
-    return res.json({ success: true, user: newUser });
-
-  } catch (err) {
-
-    return res.status(500).json({ success: false, message: 'Registration error.' });
-
-  }
-
-});
-
 
 
 // AI Chat Route

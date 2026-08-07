@@ -1,3 +1,6 @@
+if (!globalThis.crypto) {
+  globalThis.crypto = require('crypto');
+}
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -6,8 +9,26 @@ require('dotenv').config();
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// ---------------- 1. MIDDLEWARE & CORS CONFIGURATION ---------------- //
+
+// Allow requests from local frontend and Render live static site domains
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (
+        !origin ||
+        origin.includes('localhost') ||
+        origin.endsWith('.onrender.com')
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error('CORS Policy: Access denied for this origin.'));
+      }
+    },
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
 // Initialize Google Gen AI client with API Key from process.env
@@ -15,7 +36,7 @@ const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY || process.env.GEMINI_KEY
 });
 
-// ---------------- 1. MONGODB ATLAS CONNECTION ---------------- //
+// ---------------- 2. MONGODB ATLAS CONNECTION ---------------- //
 
 const MONGO_URI =
   process.env.MONGODB_URI ||
@@ -28,7 +49,7 @@ mongoose
     console.error('❌ MongoDB Atlas connection error:', err.message);
   });
 
-// ---------------- 2. SCHEMAS & MODELS ---------------- //
+// ---------------- 3. SCHEMAS & MODELS ---------------- //
 
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -48,7 +69,7 @@ const otpSchema = new mongoose.Schema({
 
 const Otp = mongoose.model('Otp', otpSchema);
 
-// ---------------- 3. HELPER FUNCTIONS & CROP DATA ---------------- //
+// ---------------- 4. HELPER FUNCTIONS & CROP DATA ---------------- //
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -188,7 +209,7 @@ const CROP_PLANS = {
   }
 };
 
-// ---------------- 4. API ROUTES ---------------- //
+// ---------------- 5. API ROUTES ---------------- //
 
 app.get('/', (req, res) => res.send('AgriCare Backend API running...'));
 
@@ -304,12 +325,10 @@ app.post('/api/precare/validate-crop', (req, res) => {
   }
 });
 
-// ---------------- 5. SERVER INITIALIZATION ---------------- //
+// ---------------- 6. SERVER INITIALIZATION ---------------- //
 
-// Set port dynamically for hosting platforms (defaults to 7860 for Hugging Face Spaces)
 const PORT = process.env.PORT || 7860;
 
-// Listen on '0.0.0.0' to enable external Docker container access
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });

@@ -96,6 +96,7 @@ function AppContent() {
       setServerOtp(data.devOtp);
       setAuthSuccess(`OTP generated! Check console/banner. (OTP: ${data.devOtp})`);
     } catch (err) {
+      console.error("Send OTP fetch error details:", err);
       setAuthError('Could not connect to authentication server. Check your connection.');
     }
   };
@@ -120,6 +121,7 @@ function AppContent() {
 
       handleAuthSuccess(data.user);
     } catch (err) {
+      console.error("Verify OTP fetch error details:", err);
       setAuthError('Error communicating with server.');
     }
   };
@@ -144,7 +146,8 @@ function AppContent() {
 
       handleAuthSuccess(data.user);
     } catch (err) {
-      setAuthError('Error completing registration.');
+      console.error("Registration fetch error details:", err);
+      setAuthError(`Connection error: ${err.message}`);
     }
   };
 

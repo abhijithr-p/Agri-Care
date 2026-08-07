@@ -8,6 +8,9 @@ export default function DiseaseDetection() {
   const [result, setResult] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
 
+  // Dynamic API URL for development and production (Render)
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -29,7 +32,7 @@ export default function DiseaseDetection() {
     formData.append('image', file);
 
     try {
-      const response = await axios.post('http://localhost:8000/api/disease-detection', formData, {
+      const response = await axios.post(`${API_URL}/api/disease-detection`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setResult(response.data);
@@ -92,7 +95,7 @@ export default function DiseaseDetection() {
               <div style={styles.statusState}>
                 <div style={styles.spinner}></div>
                 <h3 style={styles.statusHeading}>Analyzing Plant...</h3>
-                <p style={styles.statusSubtext}>Running ONNX model inference.</p>
+                <p style={styles.statusSubtext}>Running model inference.</p>
               </div>
             )}
 

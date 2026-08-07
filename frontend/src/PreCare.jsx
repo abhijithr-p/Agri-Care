@@ -15,6 +15,9 @@ export default function PreCare() {
   // Tracking Completed Stages & Verification Photos
   const [stageProgress, setStageProgress] = useState({});
 
+  // Dynamic API URL for development and production (Render)
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
   // Feature switcher helper
   const handleSelectFeature = (feature) => {
     setPlanData(null);
@@ -32,7 +35,7 @@ export default function PreCare() {
     setStageProgress({});
 
     try {
-      const response = await axios.post('http://localhost:5000/api/precare/validate-crop', {
+      const response = await axios.post(`${API_URL}/api/precare/validate-crop`, {
         crop: cropToFetch
       });
 
@@ -43,7 +46,7 @@ export default function PreCare() {
       }
     } catch (err) {
       console.error('API Error:', err);
-      setErrorMsg('Could not connect to backend server. Ensure server.js is running.');
+      setErrorMsg('Could not connect to backend server. Ensure server is running.');
     } finally {
       setLoading(false);
     }
@@ -88,7 +91,7 @@ export default function PreCare() {
         <div style={styles.chatBoxRow}>
           <input
             type="text"
-            placeholder="!"
+            placeholder="Ask a question..."
             value={chatMessage}
             onChange={(e) => setChatMessage(e.target.value)}
             style={styles.chatInput}
@@ -102,7 +105,7 @@ export default function PreCare() {
         <div style={styles.chipRow}>
           <button 
             style={styles.chipRed}
-            onClick={() => { window.location.href = 'http://localhost:5173/disease'; }}
+            onClick={() => { window.location.href = '/disease'; }}
           >
             👾 Disease Expert
           </button>
@@ -162,7 +165,7 @@ export default function PreCare() {
               {/* Option B: Redirect */}
               <div 
                 style={styles.optionCard} 
-                onClick={() => { window.location.href = 'http://localhost:5173/recommendation'; }}
+                onClick={() => { window.location.href = '/recommendation'; }}
               >
                 <div style={{ ...styles.iconCircle, backgroundColor: '#ecfdf5', color: '#10b981' }}>
                   🗺️
@@ -177,7 +180,7 @@ export default function PreCare() {
               {/* Option C: Redirect */}
               <div 
                 style={styles.optionCard} 
-                onClick={() => { window.location.href = 'http://localhost:5173/disease'; }}
+                onClick={() => { window.location.href = '/disease'; }}
               >
                 <div style={{ ...styles.iconCircle, backgroundColor: '#fef2f2', color: '#ef4444' }}>
                   🦠

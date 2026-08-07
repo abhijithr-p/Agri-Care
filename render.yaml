@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: agricare-backend
+    env: python
+    rootDir: backend_fastapi
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: MONGO_URI
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: DATABASE_NAME
+        value: agricare_db
+
+  - type: web
+    name: agricare-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishDir: ./dist

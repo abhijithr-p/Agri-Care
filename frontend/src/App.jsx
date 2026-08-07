@@ -14,6 +14,9 @@ function AppContent() {
 
   const { user, isAuthenticated, login } = useAuth();
 
+  // Dynamic API URL for development and production (Render)
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
   const [pendingPath, setPendingPath] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authTab, setAuthTab] = useState('register');
@@ -72,7 +75,7 @@ function AppContent() {
     setAuthSuccess('');
 
     try {
-      const res = await fetch('http://localhost:5000/api/auth/send-otp', {
+      const res = await fetch(`${API_URL}/api/auth/send-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: mobileNumber })
@@ -93,7 +96,7 @@ function AppContent() {
       setServerOtp(data.devOtp);
       setAuthSuccess(`OTP generated! Check console/banner. (OTP: ${data.devOtp})`);
     } catch (err) {
-      setAuthError('Could not connect to authentication server. Is your backend running on port 5000?');
+      setAuthError('Could not connect to authentication server. Check your connection.');
     }
   };
 
@@ -102,7 +105,7 @@ function AppContent() {
     setAuthError('');
 
     try {
-      const res = await fetch('http://localhost:5000/api/auth/verify-otp', {
+      const res = await fetch(`${API_URL}/api/auth/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: mobileNumber, otp: otpInput })
@@ -126,7 +129,7 @@ function AppContent() {
     setAuthError('');
 
     try {
-      const res = await fetch('http://localhost:5000/api/auth/register', {
+      const res = await fetch(`${API_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(registerData)

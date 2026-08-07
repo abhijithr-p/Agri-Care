@@ -63,10 +63,9 @@ function AppContent() {
     setServerOtp('');
     setRegisterData({ name: '', phone: '', location: '', crop: '' });
 
-    if (pendingPath) {
-      navigate(pendingPath);
-      setPendingPath(null);
-    }
+    // FIX: Redirect to home page instead of pendingPath after successful registration/login
+    navigate('/');
+    setPendingPath(null);
   };
 
   const handleSendOtp = async (e) => {
@@ -469,7 +468,7 @@ function AppContent() {
                     <input
                       type="text"
                       name="name"
-                      placeholder="e.g. John Doe"
+                      placeholder="Name"
                       value={registerData.name}
                       onChange={handleRegisterChange}
                       required
@@ -481,7 +480,7 @@ function AppContent() {
                     <input
                       type="tel"
                       name="phone"
-                      placeholder="e.g. 9876543210"
+                      placeholder="User MobileNo."
                       value={registerData.phone}
                       onChange={handleRegisterChange}
                       required
@@ -493,7 +492,7 @@ function AppContent() {
                     <input
                       type="text"
                       name="location"
-                      placeholder="e.g. Punjab"
+                      placeholder="User Location"
                       value={registerData.location}
                       onChange={handleRegisterChange}
                       style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #ccc' }}
